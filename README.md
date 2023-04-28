@@ -25,6 +25,7 @@
 * Share Bot
 * Favorite Video Bot
 * Comment Likes Bot
+* Video statistics (Views, likes, comments, shares)
 * **Free automatic captcha solve**
 
 ---------------------------------------
