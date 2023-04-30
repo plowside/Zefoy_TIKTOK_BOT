@@ -76,7 +76,9 @@ class Zefoy:
 
 	def get_table(self, i = 1):
 		table = PrettyTable(field_names=["ID", "Services", "Status"], title="Status Services", header_style="upper",border=True)
-		self.get_status_services()
+		while True:
+			if len(self.get_status_services()[0])>1:break
+			else:print('Cant get services, retrying...');self.send_captcha();time.sleep(2)
 		for service in self.services: table.add_row([f"{Fore.CYAN}{i}{Fore.RESET}", service, f"{Fore.GREEN if 'ago updated' in self.services[service] else Fore.RED}{self.services[service]}{Fore.RESET}"]); i+=1
 		table.title =  f"{Fore.YELLOW}Total Online Services: {len([x for x in self.services_status if self.services_status[x]])}{Fore.RESET}"
 		print(table)
