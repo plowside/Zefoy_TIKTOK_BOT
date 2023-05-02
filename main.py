@@ -113,8 +113,8 @@ class Zefoy:
 		self.token = "".join(random.choices(ascii_letters+digits, k=16))
 		request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':f'multipart/form-data; boundary=----WebKitFormBoundary{self.token}', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary{self.token}\r\nContent-Disposition: form-data; name="{self.video_info[0]}"\r\n\r\n{self.video_info[1]}\r\n------WebKitFormBoundary{self.token}--\r\n')
 		try: res = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
-		except: time.sleep(3); return
-		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return
+		except: time.sleep(3); return ""
+		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return ""
 		elif 'Too many requests. Please slow' in res: time.sleep(3)
 		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
 		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0])
