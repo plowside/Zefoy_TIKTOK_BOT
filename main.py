@@ -46,7 +46,8 @@ class Zefoy:
 			time.sleep(2)
 			self.get_captcha()
 
-	def send_captcha(self):
+	def send_captcha(self, new_session = False):
+		if new_session: self.session = requests.Session(); os.remove('session'); time.sleep(2)
 		if self.get_captcha(): print('Connected to session');return (True, 'The session already exists')
 		captcha_solve = self.solve_captcha('captcha.png')[1]
 		self.captcha_[self.captcha_1] = captcha_solve
@@ -90,8 +91,14 @@ class Zefoy:
 			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':'multipart/form-data; boundary=----WebKitFormBoundary0nU8PjANC8BhQgjZ', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary0nU8PjANC8BhQgjZ\r\nContent-Disposition: form-data; name="{self.video_key}"\r\n\r\n{self.url}\r\n------WebKitFormBoundary0nU8PjANC8BhQgjZ--\r\n')
 			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 			except: time.sleep(3); continue
-			if """onsubmit="showHideElements""" in self.video_info:
-				self.video_info = [self.video_info.split('type="text" name="')[1].split('"')[0],self.video_info.split('value="')[1].split('"')[0]]
+			#if "An error occurred. Please try again." in self.video_info:
+			#	self.session = requests.Session()
+			#	self.send_captcha(True)
+			#	time.sleep(2)
+			#	continue
+			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return
+			elif """onsubmit="showHideElements""" in self.video_info:
+				self.video_info = [self.video_info.split('" name="')[1].split('"')[0],self.video_info.split('value="')[1].split('"')[0]]
 				return (True, request.text)
 			else:
 				try: t=int(re.findall(r'ltm=(\d*);', self.video_info)[0])
