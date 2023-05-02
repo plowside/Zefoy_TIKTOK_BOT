@@ -1,4 +1,4 @@
-import threading, requests, ctypes, random, json, time, base64, re, os
+import threading, requests, ctypes, random, json, time, base64, sys, re, os
 from prettytable import PrettyTable
 from colorama import init, Fore
 from urllib.parse import urlparse, unquote, quote
@@ -91,12 +91,12 @@ class Zefoy:
 			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':'multipart/form-data; boundary=----WebKitFormBoundary0nU8PjANC8BhQgjZ', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary0nU8PjANC8BhQgjZ\r\nContent-Disposition: form-data; name="{self.video_key}"\r\n\r\n{self.url}\r\n------WebKitFormBoundary0nU8PjANC8BhQgjZ--\r\n')
 			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 			except: time.sleep(3); continue
-			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return (True,0)
+			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return
+			elif 'service is currently not working' in self.video_info: return (True,'Service is currently not working, try again later. | You can change it in config.')
 			elif """onsubmit="showHideElements""" in self.video_info:
 				self.video_info = [self.video_info.split('" name="')[1].split('"')[0],self.video_info.split('value="')[1].split('"')[0]]
 				return (True, request.text)
-			elif 'Too many requests. Please slow' in self.video_info: time.sleep(3)
-			else:
+			elif 'Checking Timer...' in self.video_info:
 				try: t=int(re.findall(r'ltm=(\d*);', self.video_info)[0])
 				except: return (False,)
 				if t==0:self.find_video()
@@ -105,6 +105,8 @@ class Zefoy:
 				_=time.time()
 				while time.time()-2<_+t:time.sleep(1)
 				continue
+			elif 'Too many requests. Please slow' in self.video_info: time.sleep(3)
+			else: print(self.video_info)
 
 	def use_service(self):
 		if self.find_video()[0] is False: return False
@@ -114,6 +116,7 @@ class Zefoy:
 		except: time.sleep(3); return
 		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return
 		elif 'Too many requests. Please slow' in res: time.sleep(3)
+		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
 		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0])
 
 	def get_video_info(self):
@@ -163,5 +166,6 @@ threading.Thread(target=Z.update_name).start()
 Z.send_captcha()
 Z.get_table()
 while True:
-	try:Z.use_service()
-	except:print('Critical ERROR | retrying in 10 seconds.');time.sleep(10)
+	try: 
+		if 'Service is currently not working, try again later' in str(Z.use_service()): print('Service is currently not working, try again later. | You can change it in config.');time.sleep(5)
+	except Exception as e:print(f'Critical ERROR | retrying in 10 seconds. ||| {e}');time.sleep(10)
