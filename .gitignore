@@ -161,3 +161,4 @@ cython_debug/
 captcha.png
 session
 config.json
+*.json
