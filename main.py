@@ -21,15 +21,9 @@ class Zefoy:
 		self.url = 'None'
 		self.text = 'By @flowside [No url]'
 
-	def get_google_ads(self):
-		request = self.session.get('https://partner.googleadservices.com/gampad/cookie.js?domain=zefoy.com&callback=_gfp_s_&client=ca-pub-3192305768699763&gpid_exp=1 ',headers={"Host": "partner.googleadservices.com","User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"})
-		self.session.cookies.set("_gads", request.text.strip().split('_value_":"')[1].split('","_expires_')[0], domain='zefoy.com')
-		self.session.cookies.set("__gpi", request.text.strip().split('_value_":"')[2].split('","_expires_')[0], domain='zefoy.com')
-
 	def get_captcha(self):
 		if os.path.exists('session'): self.session.cookies.set("PHPSESSID", open('session',encoding='utf-8').read(), domain='zefoy.com')
 		request = self.session.get(self.base_url, headers=self.headers)
-		if request.cookies.get_dict().get('gfp') is None: self.get_google_ads()
 		if 'Enter Video URL' in request.text: self.video_key = request.text.split('" placeholder="Enter Video URL"')[0].split('name="')[-1]; return True
 
 		try:
