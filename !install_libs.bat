@@ -1,2 +1,3 @@
-pip3 install -r requirements.txt
-pause
+pip3 install -r requiremen
+send
+
