@@ -5,8 +5,6 @@ from urllib.parse import urlparse, unquote, quote
 from string import ascii_letters, digits
 
 class Zefoy:
-	if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views'},indent=4))
-
 	def __init__(self):
 		self.base_url = 'https://zefoy.com/'
 		self.headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'}
@@ -19,7 +17,7 @@ class Zefoy:
 		self.services_ids = {}
 		self.services_status = {}
 		self.url = 'None'
-		self.text = 'By @flowside [No url]'
+		self.text = 'By @plowside [No url]'
 
 	def get_captcha(self):
 		if os.path.exists('session'): self.session.cookies.set("PHPSESSID", open('session',encoding='utf-8').read(), domain='zefoy.com')
@@ -111,6 +109,7 @@ class Zefoy:
 		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return ""
 		elif 'Too many requests. Please slow' in res: time.sleep(3)
 		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
+		elif 'Please try again later. Server too busy' in self.video_info: print('Error on submit: Please try again later. Server too busy.')
 		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0])
 
 	def get_video_info(self):
@@ -150,9 +149,11 @@ class Zefoy:
 			try:
 				ctypes.windll.kernel32.SetConsoleTitleA(self.text.encode())
 				video_info = self.get_video_info()
-				self.text = f"By @flowside | Views: {video_info['viewCount']} | Likes: {video_info['likeCount']} | Comments: {video_info['commentCount']} | Shares: {video_info['shareCount']}"
+				self.text = f"By @plowside | Views: {video_info['viewCount']} | Likes: {video_info['likeCount']} | Comments: {video_info['commentCount']} | Shares: {video_info['shareCount']}"
 			except: pass
 			time.sleep(5)
+
+if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views'},indent=4))
 
 Z = Zefoy()
 threading.Thread(target=Z.check_config).start()
