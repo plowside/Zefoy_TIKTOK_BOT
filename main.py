@@ -137,7 +137,7 @@ class Zefoy:
 		if set_url: self.url = f'https://www.tiktok.com/@{json_["author"]}/video/{json_["id"]}';print(f'Formated video url --> {self.url}')
 		return request.text
 
-	def check_config(self):
+	def check_config(self, once=False):
 		while True:
 			try: 
 				last_url = self.url
@@ -165,6 +165,7 @@ class Zefoy:
 				if last_url != self.url: self.get_video_id()
 				self.change_config()
 			except Exception as e: print(e)
+			if once: break
 			time.sleep(4)
 
 	def change_config(self):
@@ -182,6 +183,7 @@ class Zefoy:
 if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views'},indent=4))
 
 Z = Zefoy()
+Z.check_config(True)
 threading.Thread(target=Z.check_config).start()
 threading.Thread(target=Z.update_name).start()
 Z.send_captcha()
