@@ -1,4 +1,6 @@
 import threading, requests, ctypes, random, json, time, base64, sys, re, os
+
+from requests.auth import HTTPProxyAuth
 from prettytable import PrettyTable
 from colorama import init, Fore
 from urllib.parse import urlparse, unquote, quote
@@ -39,8 +41,14 @@ class Zefoy:
 			self.get_captcha()
 
 	def send_captcha(self, new_session = False):
-		if new_session: self.session = requests.Session(); os.remove('session'); time.sleep(2)
-		if self.get_captcha(): print('Connected to session');return (True, 'The session already exists')
+		if new_session:
+			self.session = requests.Session()
+			try: os.remove('session')
+			except: pass
+			time.sleep(2)
+
+		if self.get_captcha(): print('Connected to session'); return (True, 'The session already exists')
+		
 		captcha_solve = self.solve_captcha('captcha.png')[1]
 		self.captcha_[self.captcha_1] = captcha_solve
 		request = self.session.post(self.base_url, headers=self.headers, data=self.captcha_)
@@ -71,7 +79,7 @@ class Zefoy:
 		table = PrettyTable(field_names=["ID", "Services", "Status"], title="Status Services", header_style="upper",border=True)
 		while True:
 			if len(self.get_status_services()[0])>1:break
-			else:print('Cant get services, retrying...');self.send_captcha();time.sleep(2)
+			else: print('Cant get services, retrying...');self.send_captcha();time.sleep(2)
 		for service in self.services: table.add_row([f"{Fore.CYAN}{i}{Fore.RESET}", service, f"{Fore.GREEN if 'ago updated' in self.services[service] else Fore.RED}{self.services[service]}{Fore.RESET}"]); i+=1
 		table.title =  f"{Fore.YELLOW}Total Online Services: {len([x for x in self.services_status if self.services_status[x]])}{Fore.RESET}"
 		print(table)
@@ -83,7 +91,7 @@ class Zefoy:
 			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':'multipart/form-data; boundary=----WebKitFormBoundary0nU8PjANC8BhQgjZ', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary0nU8PjANC8BhQgjZ\r\nContent-Disposition: form-data; name="{self.video_key}"\r\n\r\n{self.url}\r\n------WebKitFormBoundary0nU8PjANC8BhQgjZ--\r\n')
 			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 			except: time.sleep(3); continue
-			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return
+			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return (False,)
 			elif 'service is currently not working' in self.video_info: return (True,'Service is currently not working, try again later. | You can change it in config.')
 			elif """onsubmit="showHideElements""" in self.video_info:
 				self.video_info = [self.video_info.split('" name="')[1].split('"')[0],self.video_info.split('value="')[1].split('"')[0]]
@@ -107,7 +115,7 @@ class Zefoy:
 		try: res = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 		except: time.sleep(3); return ""
 		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return ""
-		elif 'Too many requests. Please slow' in res: time.sleep(3)
+		elif 'Too many requests. Please slow' in res or 'Checking Timer' in res: time.sleep(3)
 		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
 		elif 'Please try again later. Server too busy' in self.video_info: print('Error on submit: Please try again later. Server too busy.')
 		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0])
@@ -136,13 +144,31 @@ class Zefoy:
 				config = json.loads(open('config.json',encoding='utf-8',errors='ignore').read())
 				self.url = config['url']
 				self.service = config['service']
+				self.proxy_ = config['proxy'] if config['proxy'] not in ('', ' ') else None
+				try:
+					if self.proxy_:
+						proxy = self.proxy_.split(':')
+						if self.session.proxies != {"http": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}","https": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}"}:
+							self.session.proxies = {"http": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}","https": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}"}
+
+							if self.session.get('http://ip.bablosoft.com').status_code != 200: raise Exception('Invalid proxy')
+							print('Proxies are connected')
+					else:
+						if self.session.proxies != {}:
+							print('Proxies are disabled')
+						self.session.proxies = {}
+				except Exception as e:
+					print(f'Failed to change the proxy: {e}')
+					self.proxy_ = None
+					self.session.proxies = {}
+
 				if last_url != self.url: self.get_video_id()
 				self.change_config()
 			except Exception as e: print(e)
 			time.sleep(4)
 
 	def change_config(self):
-		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service},indent=4))
+		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service,'proxy':self.proxy_},indent=4))
 
 	def update_name(self):
 		while True:
@@ -162,5 +188,10 @@ Z.send_captcha()
 Z.get_table()
 while True:
 	try: 
-		if 'Service is currently not working, try again later' in str(Z.use_service()): print('Service is currently not working, try again later. | You can change it in config.');time.sleep(5)
-	except Exception as e:print(f'Critical ERROR | retrying in 10 seconds. ||| {e}');time.sleep(10)
+		if 'Service is currently not working, try again later' in str(Z.use_service()):
+			print('Service is currently not working, try again later. | You can change it in config.')
+			time.sleep(5)
+
+	except Exception as e:
+		print(f'Critical ERROR | retrying in 30 seconds. ||| {e}')
+		time.sleep(30)

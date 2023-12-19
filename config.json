@@ -1,4 +1,5 @@
 {
     "url": "https://www.tiktok.com/@flowsideee/video/7228432282988645633",
-    "service": "Views"
+    "service": "Views",
+    "proxy": "109.248.14.106:5500:user:password"
 }
