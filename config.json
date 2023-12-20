@@ -1,7 +1,6 @@
 {
     "url": "https://www.tiktok.com/@flowsideee/video/7228432282988645633",
     "service": "Views",
-    "proxy": "38.170.95.24:9983:username:password",
-    "captcha_auto_solve": true,
-    "captcha_key": "K83114126188957"
+    "proxy": null,
+    "captcha_auto_solve": true
 }

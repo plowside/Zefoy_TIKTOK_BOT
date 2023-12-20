@@ -12,7 +12,6 @@ class Zefoy:
 		self.headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'}
 		self.session = requests.Session()
 		self.captcha_auto_solve = True
-		self.captcha_auto_solve_key = None
 		self.captcha_1 = None
 		self.captcha_ = {}
 		self.service = 'Views'
@@ -66,8 +65,8 @@ class Zefoy:
 		if path_to_file: task = path_to_file
 		else: open('temp.png','wb').write(base64.b64decode(b64)); task = 'temp.png'
 		if self.captcha_auto_solve:
-			request = self.session.post(f'https://api.ocr.space/parse/image?{self.captcha_auto_solve_key}', headers={'apikey':self.captcha_auto_solve_key}, files={'task':open(task,'rb')}).json()
-			solved_text = request['ParsedResults'][0]['ParsedText']
+			request = self.session.post("https://plowsidecaptcha.pythonanywhere.com/captcha", files={"file": ("captcha.png", open(task,'rb'), "image/png")}).json()
+			solved_text = request['captcha_text']
 		else:
 			os.system('start captcha.png')
 			solved_text = input("Solve captcha(open captcha.png if the image didn't open itself): ")
@@ -151,7 +150,6 @@ class Zefoy:
 				self.url = config['url']
 				self.service = config['service']
 				self.captcha_auto_solve = config['captcha_auto_solve']
-				self.captcha_auto_solve_key = config['captcha_key']
 
 				self.proxy_ = config['proxy'] if config['proxy'] not in ('', ' ') else None
 				try:
@@ -178,7 +176,7 @@ class Zefoy:
 			time.sleep(4)
 
 	def change_config(self):
-		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service,'proxy':self.proxy_,'captcha_auto_solve':self.captcha_auto_solve,'captcha_key':self.captcha_auto_solve_key},indent=4))
+		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service,'proxy':self.proxy_,'captcha_auto_solve':self.captcha_auto_solve},indent=4))
 
 	def update_name(self):
 		while True:
@@ -189,7 +187,7 @@ class Zefoy:
 			except: pass
 			time.sleep(5)
 
-if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','proxy':None,'captcha_auto_solve':False,'captcha_key':'K83114126188957'},indent=4))
+if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','proxy':None,'captcha_auto_solve':False},indent=4))
 
 Z = Zefoy()
 Z.check_config(True)
