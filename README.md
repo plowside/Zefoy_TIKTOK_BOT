@@ -37,8 +37,7 @@
 3. Open the file called `!install_libs.bat`. This will do everything for you with no issues, simple.
 4. Open config.json change `url` to your, `service` by your (**you will see the available services when you run the code**)
 5. Open the `!start.bat` file with Python.
-6. My program uses captcha auto-resolution through the free ocr.space service, I provide my key, but it has limitations, so create your own key and install it in the config, otherwise the captcha will not be solved:(
-7. If the program does not work without using a proxy, then buy a proxy with ipv4 authentication and install it in the proxy config in this format: _ip:port:username:password_, for example: "_38.170.95.24:9983:username:password_"
+6. If the program does not work without using a proxy, then buy a proxy with ipv4 authentication and install it in the proxy config in this format: _ip:port:username:password_, for example: "_38.170.95.24:9983:username:password_"
 
 ---------------------------------------
 ### Please note: Important
@@ -52,4 +51,4 @@
 
 * Struggling to install Python or PIP? Watch this video <a href="https://youtu.be/dYfKJMPNMDw?t=52">here</a>. 
 * 502 Bad Gateway Error: `Zefoy.com blocked it either because of a VPN/proxy or maybe your country is blocked.`
-* Endless or unsolvable captcha? - set false in the config opposite captcha_auto_solve, or read point №6 in the **How to use** section
+* Endless or unsolvable captcha? - set false in the config opposite captcha_auto_solve
