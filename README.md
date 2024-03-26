@@ -40,6 +40,13 @@
 6. If the program does not work without using a proxy, then buy a proxy with ipv4 authentication and install it in the proxy config in this format: _ip:port:username:password_, for example: "_38.170.95.24:9983:username:password_"
 
 ---------------------------------------
+
+### How to use "Comments Hearts"
+
+1. Set comment_id in config. <a href="https://youtu.be/AjRFf5jw9Vw">How to get it.</a>
+
+
+---------------------------------------
 ### Please note: Important
 1. I do not own the website `zefoy.com` and I am incapable of making some services online/offline.
 2. This Python project is simply an automator with requests for a website I do not own.
