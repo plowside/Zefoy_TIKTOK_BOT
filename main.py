@@ -131,9 +131,9 @@ class Zefoy:
 			try: res = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 			except: time.sleep(3); return ""
 			#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nRESPONSE: {res}')
-		
+
 		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return ""
-		elif 'successfully sent.' in res: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0].strip())
+		elif 'sans-serif;text-align:center;color:green;\'>' in res: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0].strip())
 		elif 'Too many requests. Please slow' in res or 'Checking Timer' in res: time.sleep(3)
 		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
 		elif 'Please try again later. Server too busy' in self.video_info: print('Error on submit: Please try again later. Server too busy.')
