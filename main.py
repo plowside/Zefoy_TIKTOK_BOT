@@ -15,6 +15,7 @@ class Zefoy:
 		self.captcha_1 = None
 		self.captcha_ = {}
 		self.service = 'Views'
+		self.comment_id = None
 		self.video_key = None
 		self.services = {}
 		self.services_ids = {}
@@ -93,9 +94,10 @@ class Zefoy:
 		if self.service is None: return (False, "You didn't choose the service")
 		while True:
 			if self.service not in self.services_ids: self.get_status_services(); time.sleep(1)
-			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':'multipart/form-data; boundary=----WebKitFormBoundary0nU8PjANC8BhQgjZ', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary0nU8PjANC8BhQgjZ\r\nContent-Disposition: form-data; name="{self.video_key}"\r\n\r\n{self.url}\r\n------WebKitFormBoundary0nU8PjANC8BhQgjZ--\r\n')
+			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, files={self.video_key: (None, self.url)})
 			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 			except: time.sleep(3); continue
+			#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nVIDEO INFO: {self.video_info}')
 			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return (False,)
 			elif 'service is currently not working' in self.video_info: return (True,'Service is currently not working, try again later. | You can change it in config.')
 			elif """onsubmit="showHideElements""" in self.video_info:
@@ -116,14 +118,26 @@ class Zefoy:
 	def use_service(self):
 		if self.find_video()[0] is False: return False
 		self.token = "".join(random.choices(ascii_letters+digits, k=16))
-		request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'content-type':f'multipart/form-data; boundary=----WebKitFormBoundary{self.token}', 'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, data=f'------WebKitFormBoundary{self.token}\r\nContent-Disposition: form-data; name="{self.video_info[0]}"\r\n\r\n{self.video_info[1]}\r\n------WebKitFormBoundary{self.token}--\r\n')
+		payload = {self.video_info[0]: (None, self.video_info[1])}
+
+		request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, files=payload)
 		try: res = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
 		except: time.sleep(3); return ""
+		#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nRESPONSE: {res}')
+		if self.service == 'Comments Hearts':
+			v = re.search(r'<i class="text-red fa fa-heart"><\/i><\/div>\n<input type="hidden" name="([^"]+)".*\n<input type="hidden" name="([^"]+)"', res)
+			if not v: time.sleep(3); return ""
+			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, files={v.group(1): (None, self.video_info[1]), v.group(2): (None, self.comment_id)})
+			try: res = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
+			except: time.sleep(3); return ""
+			#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nRESPONSE: {res}')
+		
 		if 'Session expired. Please re-login' in res: print('Session expired. Reloging...');self.send_captcha(); return ""
+		elif 'successfully sent.' in res: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0].strip())
 		elif 'Too many requests. Please slow' in res or 'Checking Timer' in res: time.sleep(3)
 		elif 'service is currently not working' in res: return ('Service is currently not working, try again later. | You can change it in config.')
 		elif 'Please try again later. Server too busy' in self.video_info: print('Error on submit: Please try again later. Server too busy.')
-		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0])
+		else: print(res.split("sans-serif;text-align:center;color:green;'>")[1].split("</")[0].strip())
 
 	def get_video_info(self):
 		request = self.session.get(f'https://tiktok.livecounts.io/video/stats/{urlparse(self.url).path.rpartition("/")[2]}',headers={'authority':'tiktok.livecounts.io','origin':'https://livecounts.io','user-agent':self.headers['user-agent']}).json()
@@ -149,6 +163,7 @@ class Zefoy:
 				config = json.loads(open('config.json',encoding='utf-8',errors='ignore').read())
 				self.url = config['url']
 				self.service = config['service']
+				self.comment_id = config['comment_id']
 				self.captcha_auto_solve = config['captcha_auto_solve']
 
 				self.proxy_ = config['proxy'] if config['proxy'] not in ('', ' ') else None
@@ -176,7 +191,7 @@ class Zefoy:
 			time.sleep(4)
 
 	def change_config(self):
-		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service,'proxy':self.proxy_,'captcha_auto_solve':self.captcha_auto_solve},indent=4))
+		open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':self.url,'service':self.service,'comment_id':self.comment_id,'proxy':self.proxy_,'captcha_auto_solve':self.captcha_auto_solve},indent=4))
 
 	def update_name(self):
 		while True:

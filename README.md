@@ -1,7 +1,7 @@
 
 <br/>
 <div align="center">
-  <a href="https://github.com/flowsidee/Zefoy_TIKTOK_BOT">
+  <a href="https://github.com/plowside/Zefoy_TIKTOK_BOT">
     <img src="https://www.edigitalagency.com.au/wp-content/uploads/TikTok-icon-glyph.png" alt="Logo" width="120" height="120">
   </a>
   
@@ -11,7 +11,7 @@
     TikTok automator using zefoy.com for <b>followers, views, likes, shares and more</b>
     <br />
     <br />
-    <a href="https://github.com/flowsidee/Zefoy_TIKTOK_BOT/issues">Report Bugs</a>
+    <a href="https://github.com/plowside/Zefoy_TIKTOK_BOT/issues">Report Bugs</a>
     
   </p>
 </div>
