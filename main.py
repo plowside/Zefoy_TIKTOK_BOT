@@ -202,7 +202,7 @@ class Zefoy:
 			except: pass
 			time.sleep(5)
 
-if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','proxy':None,'captcha_auto_solve':False},indent=4))
+if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','comment_id':None,'proxy':None,'captcha_auto_solve':False},indent=4))
 
 Z = Zefoy()
 Z.check_config(True)
