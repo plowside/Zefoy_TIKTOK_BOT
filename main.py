@@ -170,8 +170,11 @@ class Zefoy:
 				try:
 					if self.proxy_:
 						proxy = self.proxy_.split(':')
-						if self.session.proxies != {"http": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}","https": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}"}:
-							self.session.proxies = {"http": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}","https": f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}"}
+						if len(proxy) == 2: proxy_str = f"http://{proxy[0]}:{proxy[1]}"
+						else: proxy_str = f"http://{proxy[2]}:{proxy[3]}@{proxy[0]}:{proxy[1]}"
+						if self.session.proxies != {"http": proxy_str,"https": proxy_str}:
+							print(proxy_str)
+							self.session.proxies = {"http": proxy_str,"https": proxy_str}
 
 							if self.session.get('http://ip.bablosoft.com').status_code != 200: raise Exception('Invalid proxy')
 							print('Proxies are connected')
