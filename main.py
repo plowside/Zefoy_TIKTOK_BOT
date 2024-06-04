@@ -1,4 +1,4 @@
-import threading, requests, ctypes, random, json, time, base64, sys, re, os
+import webbrowser, threading, requests, ctypes, random, json, time, base64, sys, re, os
 
 from requests.auth import HTTPProxyAuth
 from prettytable import PrettyTable
@@ -27,6 +27,10 @@ class Zefoy:
 		if os.path.exists('session'): self.session.cookies.set("PHPSESSID", open('session',encoding='utf-8').read(), domain='zefoy.com')
 		request = self.session.get(self.base_url, headers=self.headers)
 		if 'Enter Video URL' in request.text: self.video_key = request.text.split('" placeholder="Enter Video URL"')[0].split('name="')[-1]; return True
+		elif '<title>Just a moment...</title>' in request.text:
+			while True:
+				input('On zefoy.com cloudflare protection is enabled, try again later.')
+			exit()
 
 		try:
 			for x in re.findall(r'<input type="hidden" name="(.*)" value="(.*)">', request.text): self.captcha_[x[0]] = x[1]
@@ -38,7 +42,7 @@ class Zefoy:
 			print('Solving captcha..')
 			return False
 		except Exception as e:
-			print(f"Cant get captcha: {e}")
+			print(f"Can\'t get captcha: {e}", type(e))
 			time.sleep(2)
 			self.get_captcha()
 
@@ -207,6 +211,7 @@ class Zefoy:
 
 if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','comment_id':None,'proxy':None,'captcha_auto_solve':False},indent=4))
 
+webbrowser.open_new_tab('https://www.tiktok.com/@flowsideee/video/7376686071742074129')
 Z = Zefoy()
 Z.check_config(True)
 threading.Thread(target=Z.check_config).start()
@@ -218,7 +223,6 @@ while True:
 		if 'Service is currently not working, try again later' in str(Z.use_service()):
 			print('Service is currently not working, try again later. | You can change it in config.')
 			time.sleep(5)
-
 	except Exception as e:
 		print(f'Critical ERROR | retrying in 30 seconds. ||| {e}')
 		time.sleep(30)
