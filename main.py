@@ -36,7 +36,6 @@ class Zefoy:
 
 			self.captcha_1 = request.text.split('type="text" name="')[1].split('" oninput="this.value=this.value.toLowerCase()"')[0]
 			captcha_url = request.text.split('<img src="')[1].split('" onerror="imgOnError()" class="')[0]
-			print(f"{self.base_url}{captcha_url}")
 			request = self.session.get(f"{self.base_url}{captcha_url}",headers=self.headers)
 			open('captcha.png', 'wb').write(request.content)
 			print('Solving captcha..')
@@ -97,8 +96,10 @@ class Zefoy:
 	def find_video(self):
 		if self.service is None: return (False, "You didn't choose the service")
 		while True:
-			if self.service not in self.services_ids: self.get_status_services(); time.sleep(1) code() 
-			except: time.sleep(3); continue  
+			if self.service not in self.services_ids: self.get_status_services(); time.sleep(1)
+			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, files={self.video_key: (None, self.url)})
+			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode() 
+			except: time.sleep(3); continue
 			#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nVIDEO INFO: {self.video_info}')
 			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return (False,)
 			elif 'service is currently not working' in self.video_info: return (True,'Service is currently not working, try again later. | You can change it in config.')
