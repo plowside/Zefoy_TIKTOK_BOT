@@ -1,6 +1,5 @@
-import webbrowser, threading, requests, ctypes, random, json, time, base64, sys, re, os
+import webbrowser, threading, requests, tls_client, ctypes, random, json, time, base64, sys, re, os
 
-from requests.auth import HTTPProxyAuth
 from prettytable import PrettyTable
 from colorama import init, Fore
 from urllib.parse import urlparse, unquote, quote
@@ -10,7 +9,7 @@ class Zefoy:
 	def __init__(self):
 		self.base_url = 'https://zefoy.com/'
 		self.headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'}
-		self.session = requests.Session()
+		self.session = tls_client.Session(client_identifier="chrome112", random_tls_extension_order=True)
 		self.captcha_auto_solve = True
 		self.captcha_1 = None
 		self.captcha_ = {}
@@ -37,6 +36,7 @@ class Zefoy:
 
 			self.captcha_1 = request.text.split('type="text" name="')[1].split('" oninput="this.value=this.value.toLowerCase()"')[0]
 			captcha_url = request.text.split('<img src="')[1].split('" onerror="imgOnError()" class="')[0]
+			print(f"{self.base_url}{captcha_url}")
 			request = self.session.get(f"{self.base_url}{captcha_url}",headers=self.headers)
 			open('captcha.png', 'wb').write(request.content)
 			print('Solving captcha..')
@@ -48,7 +48,7 @@ class Zefoy:
 
 	def send_captcha(self, new_session = False):
 		if new_session:
-			self.session = requests.Session()
+			self.session = tls_client.Session(client_identifier="chrome112", random_tls_extension_order=True)
 			try: os.remove('session')
 			except: pass
 			time.sleep(2)
@@ -70,7 +70,7 @@ class Zefoy:
 		if path_to_file: task = path_to_file
 		else: open('temp.png','wb').write(base64.b64decode(b64)); task = 'temp.png'
 		if self.captcha_auto_solve:
-			request = self.session.post("https://plowsidecaptcha.pythonanywhere.com/captcha", files={"file": ("captcha.png", open(task,'rb'), "image/png")}).json()
+			request = requests.post("https://plowsidecaptcha.pythonanywhere.com/captcha", files={"file": ("captcha.png", open(task,'rb'), "image/png")}).json()
 			solved_text = request['captcha_text']
 		else:
 			os.system('start captcha.png')
@@ -97,10 +97,8 @@ class Zefoy:
 	def find_video(self):
 		if self.service is None: return (False, "You didn't choose the service")
 		while True:
-			if self.service not in self.services_ids: self.get_status_services(); time.sleep(1)
-			request = self.session.post(f'{self.base_url}{self.services_ids[self.service]}', headers={'user-agent':self.headers['user-agent'], 'origin':'https://zefoy.com'}, files={self.video_key: (None, self.url)})
-			try: self.video_info = base64.b64decode(unquote(request.text.encode()[::-1])).decode()
-			except: time.sleep(3); continue
+			if self.service not in self.services_ids: self.get_status_services(); time.sleep(1) code() 
+			except: time.sleep(3); continue  
 			#print(f'\n\n\n\n\n\n!-----------------------------------------------------!\nVIDEO INFO: {self.video_info}')
 			if 'Session expired. Please re-login' in self.video_info: print('Session expired. Reloging...');self.send_captcha(); return (False,)
 			elif 'service is currently not working' in self.video_info: return (True,'Service is currently not working, try again later. | You can change it in config.')
@@ -153,7 +151,7 @@ class Zefoy:
 		if url_[-1] == '/': url_=url_[:-1]
 		url = urlparse(url_).path.rpartition('/')[2]
 		if url.isdigit(): self.url = url_; return url_
-		request = requests.get(f'https://api.tokcount.com/?type=videoID&username=https://vm.tiktok.com/{url}',headers={'origin': 'https://tokcount.com','authority': 'api.tokcount.com','user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'})
+		request = self.session.get(f'https://api.tokcount.com/?type=videoID&username=https://vm.tiktok.com/{url}',headers={'origin': 'https://tokcount.com','authority': 'api.tokcount.com','user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'})
 		if request.text == '': print('Invalid URL | Replace in config'); return False
 		else: json_=request.json()
 		if 'author' not in json_: print(f'{self.url}| invalid URL | Replace in config'); return False
@@ -211,7 +209,6 @@ class Zefoy:
 
 if os.path.exists('config.json') is False: open('config.json','w',encoding='utf-8',errors='ignore').write(json.dumps({'url':'https://www.tiktok.com/t/ZTRToxYct','service':'Views','comment_id':None,'proxy':None,'captcha_auto_solve':False},indent=4))
 
-webbrowser.open_new_tab('https://www.tiktok.com/@flowsideee/video/7376686071742074129')
 Z = Zefoy()
 Z.check_config(True)
 threading.Thread(target=Z.check_config).start()
