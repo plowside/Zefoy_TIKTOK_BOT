@@ -1,3 +1,4 @@
 requests
 prettytable
 colorama
+git+https://github.com/fancy45daddy/Python-Tls-Client.git
