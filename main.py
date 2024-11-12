@@ -58,7 +58,7 @@ class Zefoy:
 		self.captcha_[self.captcha_1] = captcha_solve
 		request = self.session.post(self.base_url, headers=self.headers, data=self.captcha_)
 
-		if 'Enter Video URL' in request.text: 
+		if 'Enter Video URL' in request.text:
 			print('Session was created')
 			open('session','w',encoding='utf-8').write(self.session.cookies.get('PHPSESSID'))
 			self.video_key = request.text.split('" placeholder="Enter Video URL"')[0].split('name="')[-1]
@@ -82,6 +82,7 @@ class Zefoy:
 		for x in re.findall(r'<h5 class="card-title">.+</h5>\n.+\n.+', request): self.services[x.split('<h5 class="card-title">')[1].split('<')[0].strip()] = x.split('d-sm-inline-block">')[1].split('</small>')[0].strip()
 		for x in re.findall(r'<h5 class="card-title mb-3">.+</h5>\n<form action=".+">', request): self.services_ids[x.split('title mb-3">')[1].split('<')[0].strip()] = x.split('<form action="')[1].split('">')[0].strip()
 		for x in re.findall(r'<h5 class="card-title">.+</h5>\n.+<button .+', request): self.services_status[x.split('<h5 class="card-title">')[1].split('<')[0].strip()] = False if 'disabled class' in x else True
+		print(self.services, self.services_status)
 		return (self.services, self.services_status)
 
 	def get_table(self, i = 1):
